@@ -27,6 +27,7 @@ jobs:
         pip install -r requirements.txt
     - name: Run Tests
       run: |
+        cd mysite
         python manage.py test
     - name: Lint with flake8
       run: |
