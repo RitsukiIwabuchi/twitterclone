@@ -9,7 +9,7 @@ from .forms import SignUpForm
 class IndexView(generic.TemplateView):
     template_name = 'twitterclone/index.html'
 
-class SignUpView(generic.edit.CreateView):
+class SignUpView(generic.CreateView):
     form_class = SignUpForm
     template_name = "twitterclone/signup.html" 
     success_url = reverse_lazy('twitterclone:index')
