@@ -9,6 +9,9 @@ from .forms import SignUpForm
 class IndexView(generic.TemplateView):
     template_name = 'twitterclone/index.html'
 
+class LogoutDoneView(generic.TemplateView):
+    template_name = 'twitterclone/logout_done.html'
+
 class SignUpView(generic.CreateView):
     form_class = SignUpForm
     template_name = "twitterclone/signup.html" 
