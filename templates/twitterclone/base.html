@@ -19,8 +19,8 @@
         <div class="navbar-nav ml-auto">
             {% if user.is_authenticated %}
             <a class="nav-item nav-link" href="" class="btn btn-simple">Home</a>
-            <a class="nav-item nav-link" href="" class="btn btn-simple">Tweet</a>
-            <a class="nav-item nav-link" href="" class="btn btn-simple">My Tweets</a>
+            <a class="nav-item nav-link" href="{% url 'twitterclone:new' %}" class="btn btn-simple">Tweet</a>
+            <a class="nav-item nav-link" href="{% url 'twitterclone:my-tweets' username=request.user.username %}" class="btn btn-simple">My Tweets</a>
             <a class="nav-item nav-link" href="{% url 'twitterclone:logout' %}" class="btn btn-simple">Logout</a>
             {% else %}
             <a class="nav-item nav-link" href="{% url 'twitterclone:login' %}" class="btn btn-simple">Login</a>
