@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 
 
-class Tweets(models.Model):
+class Tweet(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tweet = models.TextField(max_length=140)
     created_at = models.DateTimeField(auto_now=True)

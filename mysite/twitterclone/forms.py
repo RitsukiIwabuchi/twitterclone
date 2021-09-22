@@ -9,8 +9,8 @@ class SignUpForm(UserCreationForm):
         model = User
         fields = ('username', 'email', 'password1', 'password2')
 
-class TweetsForm(forms.ModelForm):
+class TweetForm(forms.ModelForm):
     
     class Meta:
-        model = models.Tweets
+        model = models.Tweet
         fields = ("tweet",)
