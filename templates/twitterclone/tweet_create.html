@@ -1,0 +1,11 @@
+{% extends "twitterclone/base.html" %}
+{% block content %}
+
+<h4>Create New Tweet</h4>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary btn-large">Tweet</button>
+</form>
+
+{% endblock %}
