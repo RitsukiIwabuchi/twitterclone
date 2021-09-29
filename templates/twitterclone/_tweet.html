@@ -6,11 +6,24 @@
 		<time class="time">{{ tweet_obj.created_at }}</time>
 
 		<div class="media-footer">
-			{% if user.is_authenticated and tweet_obj.user == user %}
+			{% if user.is_authenticated and tweet_obj.user == request.user %}
 			<a href="{% url 'twitterclone:delete' pk=tweet_obj.pk %}" title="delete" class="btn btn-simple">
 				<span class="fa fa-remove text-danger" aria-hidden="true"></span>
 				<span class="text-danger icon-label">Delete</span>
 			</a>
+			{% endif %}
+			{% if tweet_obj.user != request.user and request.user in tweet_obj.favorites.all %}
+			<form method="post" action="{% url 'twitterclone:favoritedelete' pk=tweet_obj.pk %}">
+                {% csrf_token %}
+				<input type="hidden" name="tweet_pk" value="{{ tweet_obj.pk }}"> 
+                <button type="submit" class="btn btn-outline-danger btn-sm">Favorite</button>
+            </form>
+			{% elif tweet_obj.user != request.user and not request.user in tweet_obj.favorites.all %}
+			<form method="post" action="{% url 'twitterclone:favorite' pk=tweet_obj.pk %}">
+                {% csrf_token %}
+				<input type="hidden" name="tweet_pk" value="{{ tweet_obj.pk }}"> 
+                <button type="submit" class="btn btn-outline-light btn-sm">Favorite</button>
+            </form>
 			{% endif %}
 		</div>
 	</div>

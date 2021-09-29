@@ -1,12 +1,12 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import generic
-from django.utils import timezone
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from .forms import SignUpForm, TweetForm
-from .models import Tweet
+from .models import Tweet, Follow
 
 class IndexView(generic.TemplateView):
     template_name = 'twitterclone/index.html'
@@ -35,18 +35,26 @@ class CreateTweetView(LoginRequiredMixin, generic.CreateView):
         self.object.save()
         return super().form_valid(form)
 
-class MyTweetsView(generic.ListView):
+class MyTweetsView(LoginRequiredMixin, generic.ListView):
     model = Tweet
     template_name = "twitterclone/tweet_list.html"
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        return queryset.select_related('user').filter(user__username__iexact=self.request.user)
+        return queryset.select_related('user').filter(user__username__iexact=self.kwargs.get("username"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["tweet_user"] = self.request.user
+        context["tweet_user"] = self.kwargs.get("username")
         return context
+
+class HomeTweetView(LoginRequiredMixin, generic.ListView):
+    model = Tweet
+    template_name = "twitterclone/tweet_list_home.html"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(user__in=Follow.objects.filter(follow_user=self.request.user).values('followed_user'))
 
 class TweetDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Tweet
@@ -59,3 +67,49 @@ class TweetDeleteView(LoginRequiredMixin, generic.DeleteView):
 
 class TweetDeleteDoneView(LoginRequiredMixin, generic.TemplateView):
     template_name = 'twitterclone/tweet_delete_done.html'
+
+class UserListView(LoginRequiredMixin, generic.ListView):
+    model = User
+    template_name = 'twitterclone/user_list.html'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.exclude(username__iexact=self.request.user.username)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["followers"] = Follow.objects.filter(follow_user=self.request.user).values_list('followed_user_id', flat=True)
+        return context
+
+class FollowView(LoginRequiredMixin, generic.TemplateView):
+    def post(self, request, **kwargs):
+        user_pk = request.POST.get('user_pk')
+        follower = get_object_or_404(User, pk=user_pk)
+        follow = Follow(follow_user=self.request.user, followed_user=follower)
+        follow.save()
+        return HttpResponse()
+        #return redirect(reverse("twitterclone:userlist"))
+
+class FollowDeleteView(LoginRequiredMixin, generic.TemplateView):
+    def post(self, request, **kwargs):
+        user_pk = request.POST.get('user_pk')
+        follower = get_object_or_404(User, pk=user_pk)
+        follow = Follow.objects.get(follow_user=self.request.user, followed_user=follower)
+        follow.delete()
+        return redirect(reverse("twitterclone:userlist"))
+
+class FavoriteView(LoginRequiredMixin, generic.TemplateView):
+    def post(self, request, **kwargs):
+        tweet_pk = request.POST.get('tweet_pk')
+        tweet = get_object_or_404(Tweet, pk=tweet_pk)
+        tweet.favorites.add(request.user)
+        tweet.save()
+        return redirect(reverse("twitterclone:home-tweets"))
+
+class FavoriteDeleteView(LoginRequiredMixin, generic.TemplateView):
+    def post(self, request, **kwargs):
+        tweet_pk = request.POST.get('tweet_pk')
+        tweet = get_object_or_404(Tweet, pk=tweet_pk)
+        tweet.favorites.remove(request.user)
+        tweet.save()
+        return redirect(reverse("twitterclone:home-tweets"))
