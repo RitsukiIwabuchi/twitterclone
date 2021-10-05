@@ -87,14 +87,13 @@ class FollowView(LoginRequiredMixin, generic.TemplateView):
         follower = get_object_or_404(User, pk=user_pk)
         follow = Follow(follow_user=self.request.user, followed_user=follower)
         follow.save()
-        return HttpResponse()
-        #return redirect(reverse("twitterclone:userlist"))
+        return redirect(reverse("twitterclone:userlist"))
 
 class FollowDeleteView(LoginRequiredMixin, generic.TemplateView):
     def post(self, request, **kwargs):
         user_pk = request.POST.get('user_pk')
         follower = get_object_or_404(User, pk=user_pk)
-        follow = Follow.objects.get(follow_user=self.request.user, followed_user=follower)
+        follow = get_object_or_404(Follow, follow_user=self.request.user, followed_user=follower)
         follow.delete()
         return redirect(reverse("twitterclone:userlist"))
 
